@@ -1,3 +1,5 @@
 {
-  "item.command_sign_mod.command_sign_item": "Panneau de commande"
+  "item.command_sign_mod.command_sign_item": "Panneau de commande",
+  "block.command_sign_mod.command_sign_wall_block": "Panneau de commande",
+  "block.command_sign_mod.command_sign_block": "Panneau de commande"
 }

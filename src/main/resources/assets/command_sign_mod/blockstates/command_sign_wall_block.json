@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "command_sign_mod:block/command_sign_block" }
+  }
+}

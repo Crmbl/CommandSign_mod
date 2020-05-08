@@ -1,3 +1,6 @@
 {
-  "item.command_sign_mod.command_sign_item": "Command Sign"
+  "item.command_sign_mod.command_sign_item": "Command Sign",
+  "block.command_sign_mod.command_sign_wall_block": "Command Sign",
+  "block.command_sign_mod.command_sign_block": "Command Sign"
+
 }

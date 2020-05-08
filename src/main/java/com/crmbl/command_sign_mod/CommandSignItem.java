@@ -6,7 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WallOrFloorItem;
-import net.minecraft.tileentity.SignTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -21,7 +21,10 @@ public class CommandSignItem extends WallOrFloorItem {
     protected boolean onBlockPlaced(BlockPos pos, World worldIn, @Nullable PlayerEntity player, ItemStack stack, BlockState state) {
         boolean flag = super.onBlockPlaced(pos, worldIn, player, stack, state);
         if (!worldIn.isRemote && !flag && player != null) {
-            player.openSignEditor((SignTileEntity)worldIn.getTileEntity(pos));
+
+            TileEntity tileEntity = worldIn.getTileEntity(pos);
+            if (tileEntity instanceof CommandSignTileEntity)
+                player.openSignEditor((CommandSignTileEntity)tileEntity);
         }
 
         return flag;
