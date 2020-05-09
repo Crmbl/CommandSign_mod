@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SOpenSignMenuPacket;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.SignTileEntity;
@@ -218,8 +219,11 @@ public class CommandSignTileEntity extends SignTileEntity {
         Item currentItem = currentItemStack.getItem();
 
         if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
-            if (player instanceof ServerPlayerEntity)
-                this.setPlayer(player); //this.connection.sendPacket(new SOpenSignMenuPacket(signTile.getPos())); ??
+            if (player instanceof ServerPlayerEntity) {
+                this.setPlayer(player);
+                ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
+                //serverPlayer.connection.sendPacket(new SOpenSignMenuPacket(this.getPos()));
+            }
             if (player instanceof ClientPlayerEntity) {
                 this.setEditable(true);
                 Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(this, false));

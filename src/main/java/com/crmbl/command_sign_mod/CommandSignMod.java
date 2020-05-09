@@ -14,6 +14,7 @@ public class CommandSignMod
     public CommandSignMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new CommandSignModEventHandler());
         CommandSignModItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         CommandSignModBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         CommandSignModEntityType.TILE_ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());

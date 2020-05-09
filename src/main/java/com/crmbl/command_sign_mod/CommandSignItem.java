@@ -9,6 +9,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WallOrFloorItem;
+import net.minecraft.network.play.server.SOpenSignMenuPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,8 +26,11 @@ public class CommandSignItem extends WallOrFloorItem {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         if (tileEntity instanceof CommandSignTileEntity) {
             CommandSignTileEntity commandSignTile = (CommandSignTileEntity)tileEntity;
-            if (player instanceof ServerPlayerEntity)
-                commandSignTile.setPlayer(player); //this.connection.sendPacket(new SOpenSignMenuPacket(signTile.getPos())); ??
+            if (player instanceof ServerPlayerEntity) {
+                commandSignTile.setPlayer(player);
+                ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
+                //serverPlayer.connection.sendPacket(new SOpenSignMenuPacket(commandSignTile.getPos()));
+            }
             if (player instanceof ClientPlayerEntity)
                 Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(commandSignTile, true));
         }
