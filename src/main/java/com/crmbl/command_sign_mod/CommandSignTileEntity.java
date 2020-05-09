@@ -28,6 +28,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -221,12 +222,7 @@ public class CommandSignTileEntity extends SignTileEntity {
         if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
             if (player instanceof ServerPlayerEntity) {
                 this.setPlayer(player);
-                ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
-                //serverPlayer.connection.sendPacket(new SOpenSignMenuPacket(this.getPos()));
-            }
-            if (player instanceof ClientPlayerEntity) {
-                this.setEditable(true);
-                Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(this, false));
+                CommandSignModPacketHandler.INSTANCE.send(PacketDistributor.SERVER.with(() -> null), new CommandSignModOpenMenuPacket(this.getPos(), false));
             }
         }
         else

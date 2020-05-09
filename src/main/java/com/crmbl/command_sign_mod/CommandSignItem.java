@@ -2,17 +2,15 @@ package com.crmbl.command_sign_mod;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.WallOrFloorItem;
-import net.minecraft.network.play.server.SOpenSignMenuPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 
@@ -28,11 +26,8 @@ public class CommandSignItem extends WallOrFloorItem {
             CommandSignTileEntity commandSignTile = (CommandSignTileEntity)tileEntity;
             if (player instanceof ServerPlayerEntity) {
                 commandSignTile.setPlayer(player);
-                ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
-                //serverPlayer.connection.sendPacket(new SOpenSignMenuPacket(commandSignTile.getPos()));
+                CommandSignModPacketHandler.INSTANCE.send(PacketDistributor.SERVER.with(() -> null), new CommandSignModOpenMenuPacket(commandSignTile.getPos(), true));
             }
-            if (player instanceof ClientPlayerEntity)
-                Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(commandSignTile, true));
         }
         return flag;
     }
