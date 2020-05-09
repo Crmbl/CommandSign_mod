@@ -11,7 +11,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.LogManager;
 
 public class CommandSignBlock extends StandingSignBlock {
 
@@ -30,9 +29,12 @@ public class CommandSignBlock extends StandingSignBlock {
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_) {
-        LogManager.getLogger().info("ACTIVATED STANDING");
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult result) {
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if (!(tileEntity instanceof CommandSignTileEntity))
+            return super.onBlockActivated(state, worldIn, pos, player, handIn, result);
 
-        return super.onBlockActivated(state, worldIn, pos, player, handIn, p_225533_6_);
+        CommandSignTileEntity signTileEntity = ((CommandSignTileEntity) tileEntity);
+        return signTileEntity.onCommandSignActivated(player, handIn);
     }
 }

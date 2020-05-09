@@ -1,24 +1,29 @@
 package com.crmbl.command_sign_mod;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.DyeColor;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentUtils;
+import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,6 +34,7 @@ import java.util.function.Function;
 public class CommandSignTileEntity extends SignTileEntity {
 
     public final ITextComponent[] signText = new ITextComponent[]{new StringTextComponent(""), new StringTextComponent(""), new StringTextComponent(""), new StringTextComponent("")};
+    public String commandText = "";
     private boolean isEditable = true;
     private PlayerEntity player;
     private final String[] renderText = new String[4];
@@ -41,29 +47,31 @@ public class CommandSignTileEntity extends SignTileEntity {
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
-        super.write(compound);
-
         for(int i = 0; i < 4; ++i) {
             String s = ITextComponent.Serializer.toJson(this.signText[i]);
             compound.putString("Text" + (i + 1), s);
         }
 
+        if (this.commandText != null)
+            compound.putString("CommandSign_Command", this.commandText);
+
         compound.putString("Color", this.textColor.getTranslationKey());
-        return compound;
+        return super.write(compound);
     }
 
     @Override
     public void read(CompoundNBT compound) {
-        this.isEditable = false;
         super.read(compound);
-        this.textColor = DyeColor.byTranslationKey(compound.getString("Color"), DyeColor.BLACK);
+        this.isEditable = false;
+        this.textColor = DyeColor.byTranslationKey(compound.getString("Color"), DyeColor.RED);
+        this.commandText = compound.getString("CommandSign_Command");
 
         for(int i = 0; i < 4; ++i) {
             String s = compound.getString("Text" + (i + 1));
             ITextComponent itextcomponent = ITextComponent.Serializer.fromJson(s.isEmpty() ? "\"\"" : s);
             if (this.world instanceof ServerWorld) {
                 try {
-                    this.signText[i] = TextComponentUtils.updateForEntity(this.getCommandSource((ServerPlayerEntity)null), itextcomponent, (Entity)null, 0);
+                    this.signText[i] = TextComponentUtils.updateForEntity(this.getCommandSource(null), itextcomponent, null, 0);
                 } catch (CommandSyntaxException var6) {
                     this.signText[i] = itextcomponent;
                 }
@@ -73,17 +81,48 @@ public class CommandSignTileEntity extends SignTileEntity {
 
             this.renderText[i] = null;
         }
+    }
 
+    @Nullable
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.pos, 9, this.getUpdateTag());
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        CompoundNBT tag = pkt.getNbtCompound();
+        this.commandText = tag.getString("CommandSign_Command");
+    }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return this.write(super.getUpdateTag());
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundNBT nbt) {
+        super.handleUpdateTag(nbt);
+        this.read(nbt);
     }
 
     @OnlyIn(Dist.CLIENT)
+    @Override
     public ITextComponent getText(int line) {
         return this.signText[line];
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public String getCommand() { return this.commandText;}
+
+    @Override
     public void setText(int line, ITextComponent p_212365_2_) {
         this.signText[line] = p_212365_2_;
         this.renderText[line] = null;
+    }
+
+    public void setCommand(String command) {
+        this.commandText = command;
     }
 
     @Nullable
@@ -96,43 +135,36 @@ public class CommandSignTileEntity extends SignTileEntity {
         return this.renderText[line];
     }
 
-    @Nullable
-    @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(this.pos, 9, this.getUpdateTag());
-    }
-
-    @Override
-    public CompoundNBT getUpdateTag() {
-        return this.write(new CompoundNBT());
-    }
-
     @Override
     public boolean onlyOpsCanSetNbt() {
-        return true;
+        return false;
     }
 
+    @Override
     public boolean getIsEditable() {
         return this.isEditable;
     }
 
     @OnlyIn(Dist.CLIENT)
+    @Override
     public void setEditable(boolean isEditableIn) {
         this.isEditable = isEditableIn;
         if (!isEditableIn) {
             this.player = null;
         }
-
     }
 
+    @Override
     public void setPlayer(PlayerEntity playerIn) {
         this.player = playerIn;
     }
 
+    @Override
     public PlayerEntity getPlayer() {
         return this.player;
     }
 
+    @Override
     public boolean executeCommand(PlayerEntity playerIn) {
         for(ITextComponent itextcomponent : this.signText) {
             Style style = itextcomponent == null ? null : itextcomponent.getStyle();
@@ -147,25 +179,60 @@ public class CommandSignTileEntity extends SignTileEntity {
         return true;
     }
 
+    @Override
     public CommandSource getCommandSource(@Nullable ServerPlayerEntity playerIn) {
         String s = playerIn == null ? "Sign" : playerIn.getName().getString();
-        ITextComponent itextcomponent = (ITextComponent)(playerIn == null ? new StringTextComponent("Sign") : playerIn.getDisplayName());
+        ITextComponent itextcomponent = playerIn == null ? new StringTextComponent("Sign") : playerIn.getDisplayName();
         return new CommandSource(ICommandSource.DUMMY, new Vec3d((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D), Vec2f.ZERO, (ServerWorld)this.world, 2, s, itextcomponent, this.world.getServer(), playerIn);
     }
 
+    @Override
     public DyeColor getTextColor() {
         return this.textColor;
     }
 
+    @Override
     public boolean setTextColor(DyeColor newColor) {
-        if (newColor != this.getTextColor()) {
-            this.textColor = newColor;
-            this.markDirty();
-            this.world.notifyBlockUpdate(this.getPos(), this.getBlockState(), this.getBlockState(), 3);
-            return true;
-        } else {
-            return false;
+        return false;
+    }
+
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    public void executeString(PlayerEntity playerIn) {
+        if (playerIn instanceof ServerPlayerEntity) {
+            ServerPlayerEntity serverPlayer = (ServerPlayerEntity)playerIn;
+            MinecraftServer serverWorld = serverPlayer.getServerWorld().getServer();
+            Commands commandManager = serverWorld.getCommandManager();
+
+            //TODO remove
+            this.commandText = "time set day";
+            try {
+                commandManager.getDispatcher().execute(this.commandText, serverWorld.getCommandSource());
+            } catch (CommandSyntaxException ignored) {
+                serverWorld.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
+            }
         }
     }
 
+    public ActionResultType onCommandSignActivated(PlayerEntity player, Hand handIn) {
+        ItemStack currentItemStack = player.getHeldItem(handIn);
+        Item currentItem = currentItemStack.getItem();
+
+        if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
+            if (player instanceof ServerPlayerEntity)
+                this.setPlayer(player); //this.connection.sendPacket(new SOpenSignMenuPacket(signTile.getPos())); ??
+            if (player instanceof ClientPlayerEntity) {
+                this.setEditable(true);
+                Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(this, false));
+            }
+        }
+        else
+            this.executeString(player);
+
+        return ActionResultType.SUCCESS;
+    }
+
+    public void onCloseGUI() {
+        this.getWorld().notifyBlockUpdate(pos, this.getBlockState(), this.getBlockState(), 2);
+    }
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
 }

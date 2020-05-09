@@ -1,6 +1,7 @@
 {
   "item.command_sign_mod.command_sign_item": "Command Sign",
+  "item.command_sign_mod.command_wand_item" : "Command Wand",
   "block.command_sign_mod.command_sign_wall_block": "Command Sign",
-  "block.command_sign_mod.command_sign_block": "Command Sign"
-
+  "block.command_sign_mod.command_sign_block": "Command Sign",
+  "command_sign_mod.syntax_error": "Syntax error command"
 }

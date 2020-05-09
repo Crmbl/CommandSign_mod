@@ -15,4 +15,11 @@ public class CommandSignModItems {
                     CommandSignModBlocks.COMMAND_SIGN_WALL_BLOCK.get()
             )
     );
+    public static final RegistryObject<Item> COMMAND_WAND = ITEMS.register("command_wand_item", () ->
+            new CommandWandItem(new Item.Properties()
+                    .maxStackSize(64)
+                    .setNoRepair()
+                    .group(ItemGroup.MISC)
+            )
+    );
 }
