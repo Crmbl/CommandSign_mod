@@ -27,17 +27,17 @@ import java.util.List;
 
 public class CommandSignScreen extends Screen {
     private final CommandSignTileEntityRenderer.SignModel model = new CommandSignTileEntityRenderer.SignModel();
-    /** Reference to the sign object. */
     private final CommandSignTileEntity tileSign;
-    /** Counts the number of screen updates. */
     private int updateCounter;
-    /** The index of the line that is being edited. */
     private int editLine;
     private TextInputUtil textInputUtil;
     private final Minecraft minecraft;
+    private final boolean isTextEdit;
 
     public CommandSignScreen(CommandSignTileEntity teSign, boolean isTextEdit) {
-        super(new TranslationTextComponent("sign.edit"));
+        super(new TranslationTextComponent(isTextEdit ? "sign.edit" : "command_sign_mod_command.edit"));
+
+        this.isTextEdit = isTextEdit;
         this.tileSign = teSign;
         this.minecraft = Minecraft.getInstance();
     }
@@ -47,16 +47,28 @@ public class CommandSignScreen extends Screen {
         this.minecraft.keyboardListener.enableRepeatEvents(true);
         this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120, 200, 20, I18n.format("gui.done"), (p_214266_1_) -> this.close()));
         this.tileSign.setEditable(false);
-        this.textInputUtil = new TextInputUtil(this.minecraft, () -> this.tileSign.getText(this.editLine).getString(), (p_214265_1_) ->
-                this.tileSign.setText(this.editLine, new StringTextComponent(p_214265_1_)), 90);
+
+        if (this.isTextEdit) {
+            this.textInputUtil = new TextInputUtil(this.minecraft, () -> this.tileSign.getText(this.editLine).getString(), (p_214265_1_) ->
+            this.tileSign.setText(this.editLine, new StringTextComponent(p_214265_1_)), 90);
+        }
+        else {
+            this.textInputUtil = new TextInputUtil(this.minecraft, () -> this.tileSign.getCommand(this.editLine).getString(), (p_214265_1_) ->
+            this.tileSign.setCommand(this.editLine, new StringTextComponent(p_214265_1_)), 90);
+        }
     }
 
     @Override
     public void removed() {
         Minecraft.getInstance().keyboardListener.enableRepeatEvents(false);
         ClientPlayNetHandler clientplaynethandler = this.minecraft.getConnection();
+        String[] lines = new String[] {this.tileSign.getText(0).getString(), this.tileSign.getText(1).getString(), this.tileSign.getText(2).getString(), this.tileSign.getText(3).getString()};
+        String[] commands = new String[] {this.tileSign.getCommand(0).getString(), this.tileSign.getCommand(1).getString(), this.tileSign.getCommand(2).getString(), this.tileSign.getCommand(3).getString()};
         if (clientplaynethandler != null) {
-            clientplaynethandler.sendPacket(new CUpdateSignPacket(this.tileSign.getPos(), this.tileSign.getText(0), this.tileSign.getText(1), this.tileSign.getText(2), this.tileSign.getText(3)));
+            if (this.isTextEdit)
+                clientplaynethandler.sendPacket(new CUpdateSignPacket(this.tileSign.getPos(), this.tileSign.getText(0), this.tileSign.getText(1), this.tileSign.getText(2), this.tileSign.getText(3)));
+            else
+                clientplaynethandler.sendPacket(new CommandSignModUpdateSignPacket(this.tileSign.getPos(), commands, lines));
         }
 
         this.tileSign.setEditable(true);
@@ -77,7 +89,6 @@ public class CommandSignScreen extends Screen {
 
     public void close() {
         this.tileSign.markDirty();
-        this.tileSign.onCloseGUI();
         this.minecraft.displayGuiScreen(null);
     }
 
@@ -87,18 +98,26 @@ public class CommandSignScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 265) {
-            this.editLine = this.editLine - 1 & 3;
-            this.textInputUtil.func_216899_b();
+    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) { //TODO
+        //if (this.isTextEdit) {
+            if (p_keyPressed_1_ == 265) {
+                this.editLine = this.editLine - 1 & 3;
+                this.textInputUtil.func_216899_b();
+                return true;
+            } else if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335) {
+                return this.textInputUtil.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+            } else {
+                this.editLine = this.editLine + 1 & 3;
+                this.textInputUtil.func_216899_b();
+                return true;
+            }
+        /*}
+        else {
+            if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335)
+                return this.textInputUtil.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+
             return true;
-        } else if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335) {
-            return this.textInputUtil.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-        } else {
-            this.editLine = this.editLine + 1 & 3;
-            this.textInputUtil.func_216899_b();
-            return true;
-        }
+        }*/
     }
 
     @Override
@@ -113,9 +132,8 @@ public class CommandSignScreen extends Screen {
         matrixstack.translate(0.0D, -1.3125D, 0.0D);
         BlockState blockstate = this.tileSign.getBlockState();
         boolean flag = blockstate.getBlock() instanceof StandingSignBlock;
-        if (!flag) {
+        if (!flag)
             matrixstack.translate(0.0D, -0.3125D, 0.0D);
-        }
 
         boolean flag1 = this.updateCounter / 6 % 2 == 0;
         matrixstack.push();
@@ -124,9 +142,8 @@ public class CommandSignScreen extends Screen {
         Material material = CommandSignTileEntityRenderer.getMaterial(blockstate.getBlock());
         IVertexBuilder ivertexbuilder = material.getBuffer(irendertypebuffer$impl, this.model::getRenderType);
         this.model.signBoard.render(matrixstack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
-        if (flag) {
+        if (flag)
             this.model.signStick.render(matrixstack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY);
-        }
 
         matrixstack.pop();
         matrixstack.translate(0.0D, 0.33333334F, 0.046666667F);
@@ -135,16 +152,26 @@ public class CommandSignScreen extends Screen {
         String[] astring = new String[4];
 
         for(int j = 0; j < astring.length; ++j) {
-            astring[j] = this.tileSign.getRenderText(j, (p_228192_1_) -> {
-                List<ITextComponent> list = RenderComponentsUtil.splitText(p_228192_1_, 90, this.minecraft.fontRenderer, false, true);
-                return list.isEmpty() ? "" : list.get(0).getFormattedText();
-            });
+            if (this.isTextEdit) {
+                astring[j] = this.tileSign.getRenderText(j, (p_228192_1_) -> {
+                    List<ITextComponent> list = RenderComponentsUtil.splitText(p_228192_1_, 90, this.minecraft.fontRenderer, false, true);
+                    return list.isEmpty() ? "" : list.get(0).getFormattedText();
+                });
+            }
+            else {
+                astring[j] = this.tileSign.getRenderCommand(j, (p_228192_1_) -> {
+                    List<ITextComponent> list = RenderComponentsUtil.splitText(p_228192_1_, 90, this.minecraft.fontRenderer, false, true);
+                    return list.isEmpty() ? "" : list.get(0).getFormattedText();
+                });
+            }
         }
 
         Matrix4f matrix4f = matrixstack.getLast().getMatrix();
         int k = this.textInputUtil.func_216896_c();
         int l = this.textInputUtil.func_216898_d();
         int i1 = this.minecraft.fontRenderer.getBidiFlag() ? -1 : 1;
+
+        //TODO if !isTextEdit make more room for text ?
         int j1 = this.editLine * 10 - this.tileSign.signText.length * 5;
 
         for(int k1 = 0; k1 < astring.length; ++k1) {

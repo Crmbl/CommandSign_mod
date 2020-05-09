@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.item.DyeColor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -55,7 +56,7 @@ public class CommandSignTileEntityRenderer extends TileEntityRenderer<CommandSig
         FontRenderer fontrenderer = this.renderDispatcher.getFontRenderer();
         matrixStackIn.translate(0.0D, (double)0.33333334F, (double)0.046666667F);
         matrixStackIn.scale(0.010416667F, -0.010416667F, 0.010416667F);
-        int i = tileEntityIn.getTextColor().getTextColor();
+        int i = DyeColor.RED.getTextColor();
         int j = (int)((double) NativeImage.getRed(i) * 0.4D);
         int k = (int)((double)NativeImage.getGreen(i) * 0.4D);
         int l = (int)((double)NativeImage.getBlue(i) * 0.4D);

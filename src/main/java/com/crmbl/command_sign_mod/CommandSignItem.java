@@ -10,7 +10,6 @@ import net.minecraft.item.WallOrFloorItem;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 
@@ -22,13 +21,12 @@ public class CommandSignItem extends WallOrFloorItem {
     protected boolean onBlockPlaced(BlockPos pos, World worldIn, @Nullable PlayerEntity player, ItemStack stack, BlockState state) {
         boolean flag = super.onBlockPlaced(pos, worldIn, player, stack, state);
         TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if (tileEntity instanceof CommandSignTileEntity) {
-            CommandSignTileEntity commandSignTile = (CommandSignTileEntity)tileEntity;
-            if (player instanceof ServerPlayerEntity) {
-                commandSignTile.setPlayer(player);
-                CommandSignModPacketHandler.INSTANCE.send(PacketDistributor.SERVER.with(() -> null), new CommandSignModOpenMenuPacket(commandSignTile.getPos(), true));
-            }
-        }
+        if (!(tileEntity instanceof CommandSignTileEntity) || !(player instanceof ServerPlayerEntity))
+            return flag;
+
+        CommandSignTileEntity commandSignTile = (CommandSignTileEntity)tileEntity;
+        commandSignTile.setPlayer(player);
+        ((ServerPlayerEntity) player).connection.sendPacket(new CommandSignModOpenSignPacket(commandSignTile.getPos(), true));
         return flag;
     }
 }
