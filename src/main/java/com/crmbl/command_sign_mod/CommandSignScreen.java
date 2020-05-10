@@ -62,13 +62,12 @@ public class CommandSignScreen extends Screen {
     public void removed() {
         Minecraft.getInstance().keyboardListener.enableRepeatEvents(false);
         ClientPlayNetHandler clientplaynethandler = this.minecraft.getConnection();
-        String[] lines = new String[] {this.tileSign.getText(0).getString(), this.tileSign.getText(1).getString(), this.tileSign.getText(2).getString(), this.tileSign.getText(3).getString()};
         String[] commands = new String[] {this.tileSign.getCommand(0).getString(), this.tileSign.getCommand(1).getString(), this.tileSign.getCommand(2).getString(), this.tileSign.getCommand(3).getString()};
         if (clientplaynethandler != null) {
             if (this.isTextEdit)
                 clientplaynethandler.sendPacket(new CUpdateSignPacket(this.tileSign.getPos(), this.tileSign.getText(0), this.tileSign.getText(1), this.tileSign.getText(2), this.tileSign.getText(3)));
             else
-                clientplaynethandler.sendPacket(new CommandSignModUpdateSignPacket(this.tileSign.getPos(), commands, lines));
+                clientplaynethandler.sendPacket(new CommandSignModUpdateSignPacket(this.tileSign.getPos(), commands));
         }
 
         this.tileSign.setEditable(true);

@@ -17,13 +17,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHandler> {
     private BlockPos pos;
     private String[] commands;
-    private String[] lines;
 
     @OnlyIn(Dist.CLIENT)
-    public CommandSignModUpdateSignPacket(BlockPos blockPos, String[] commands, String[] lines) {
+    public CommandSignModUpdateSignPacket(BlockPos blockPos, String[] commands) {
         this.pos = blockPos;
         this.commands = new String[] { commands[0], commands[1], commands[2], commands[3] };
-        this.lines = new String[] { lines[0], lines[1], lines[2], lines[3] };
     }
 
     public BlockPos getPosition() {
@@ -32,17 +30,11 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
 
     public String[] getCommand() { return this.commands; }
 
-    public String[] getLines() { return this.lines; }
-
     @Override
     public void readPacketData(PacketBuffer buf) {
         this.pos = buf.readBlockPos();
-        this.lines = new String[4];
-
         for (int i = 0; i < 4; i++)
             this.commands[i] = buf.readString(384);
-        for (int i = 0; i < 4; i++)
-            this.lines[i] = buf.readString(384);
     }
 
     @Override
@@ -51,8 +43,6 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
 
         for (int i = 0; i < 4; i++)
             buf.writeString(this.commands[i]);
-        for (int i = 0; i < 4; i++)
-            buf.writeString(this.lines[i]);
     }
 
     @Override
@@ -73,10 +63,6 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
                 server.player.getServer().logWarning("Player " + server.player.getName().getString() + " just tried to change non-editable sign");
                 return;
             }
-
-            String[] lines = this.getLines();
-            for(int i = 0; i < lines.length; ++i)
-                commandSignTileEntity.setText(i, new StringTextComponent(TextFormatting.getTextWithoutFormattingCodes(lines[i])));
 
             String[] commands = this.getCommand();
             for(int i = 0; i < commands.length; ++i)
