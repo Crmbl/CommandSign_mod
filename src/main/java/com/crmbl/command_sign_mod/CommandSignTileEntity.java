@@ -126,8 +126,8 @@ public class CommandSignTileEntity extends SignTileEntity {
 
         if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
             setEditable(true);
-            this.setPlayer(player);
-            player.connection.sendPacket(new CommandSignModOpenSignPacket(this.getPos(), false));
+            setPlayer(player);
+            player.connection.sendPacket(new CommandSignModOpenSignPacket(getPos(), false));
         }
         else
             this.executeString(player);

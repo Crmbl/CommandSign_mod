@@ -1,6 +1,7 @@
 package com.crmbl.command_sign_mod;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.PacketThreadUtil;
@@ -8,6 +9,7 @@ import net.minecraft.network.play.IServerPlayNetHandler;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
@@ -18,21 +20,19 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
     private BlockPos pos;
     private String[] commands;
 
+    public CommandSignModUpdateSignPacket() {
+    }
+
     @OnlyIn(Dist.CLIENT)
-    public CommandSignModUpdateSignPacket(BlockPos blockPos, String[] commands) {
+    public CommandSignModUpdateSignPacket(BlockPos blockPos, ITextComponent command1, ITextComponent command2, ITextComponent command3, ITextComponent command4) {
         this.pos = blockPos;
-        this.commands = new String[] { commands[0], commands[1], commands[2], commands[3] };
+        this.commands = new String[] { command1.getString(), command2.getString(), command3.getString(), command4.getString() };
     }
-
-    public BlockPos getPosition() {
-        return this.pos;
-    }
-
-    public String[] getCommand() { return this.commands; }
 
     @Override
     public void readPacketData(PacketBuffer buf) {
         this.pos = buf.readBlockPos();
+        this.commands = new String[4];
         for (int i = 0; i < 4; i++)
             this.commands[i] = buf.readString(384);
     }
@@ -48,9 +48,10 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
     @Override
     public void processPacket(IServerPlayNetHandler handler) {
         ServerPlayNetHandler server = (ServerPlayNetHandler)handler;
-        PacketThreadUtil.checkThreadAndEnqueue(this, server, server.player.getServerWorld());
-        server.player.markPlayerActive();
-        ServerWorld serverworld = server.player.getServer().getWorld(server.player.dimension);
+        ServerPlayerEntity player = server.player;
+        PacketThreadUtil.checkThreadAndEnqueue(this, handler, player.getServerWorld());
+        player.markPlayerActive();
+        ServerWorld serverworld = player.getServer().getWorld(player.dimension);
         BlockPos blockpos = this.getPosition();
         if (serverworld.isBlockLoaded(blockpos)) {
             BlockState blockstate = serverworld.getBlockState(blockpos);
@@ -59,8 +60,8 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
                 return;
 
             CommandSignTileEntity commandSignTileEntity = (CommandSignTileEntity)tileentity;
-            if (!commandSignTileEntity.getIsEditable() || commandSignTileEntity.getPlayer() != server.player) {
-                server.player.getServer().logWarning("Player " + server.player.getName().getString() + " just tried to change non-editable sign");
+            if (!commandSignTileEntity.getIsEditable() || commandSignTileEntity.getPlayer() != player) {
+                player.getServer().logWarning("Player " + player.getName().getString() + " just tried to change non-editable sign");
                 return;
             }
 
@@ -72,4 +73,10 @@ public class CommandSignModUpdateSignPacket implements IPacket<IServerPlayNetHan
             serverworld.notifyBlockUpdate(blockpos, blockstate, blockstate, 3);
         }
     }
+
+    public BlockPos getPosition() {
+        return this.pos;
+    }
+
+    public String[] getCommand() { return this.commands; }
 }

@@ -1,7 +1,6 @@
 package com.crmbl.command_sign_mod;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
@@ -14,6 +13,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CommandSignModOpenSignPacket implements IPacket<IClientPlayNetHandler> {
     private BlockPos signPosition;
     private boolean isTextEdit;
+
+    public CommandSignModOpenSignPacket() {
+    }
 
     public CommandSignModOpenSignPacket(BlockPos posIn, boolean isTextEdit) {
         this.signPosition = posIn;
@@ -38,10 +40,10 @@ public class CommandSignModOpenSignPacket implements IPacket<IClientPlayNetHandl
     @OnlyIn(Dist.CLIENT)
     public boolean getTextEdit() { return this.isTextEdit; }
 
+    @OnlyIn(Dist.CLIENT)
     public void processPacket(IClientPlayNetHandler handler) {
-        ClientPlayNetHandler clientHandler = (ClientPlayNetHandler)handler;
         Minecraft minecraft = Minecraft.getInstance();
-        PacketThreadUtil.checkThreadAndEnqueue(this, clientHandler, minecraft);
+        PacketThreadUtil.checkThreadAndEnqueue(this, handler, minecraft);
         TileEntity tileentity = minecraft.world.getTileEntity(this.getSignPosition());
         if (!(tileentity instanceof CommandSignTileEntity)) {
             tileentity = new CommandSignTileEntity();

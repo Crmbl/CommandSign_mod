@@ -62,12 +62,11 @@ public class CommandSignScreen extends Screen {
     public void removed() {
         Minecraft.getInstance().keyboardListener.enableRepeatEvents(false);
         ClientPlayNetHandler clientplaynethandler = this.minecraft.getConnection();
-        String[] commands = new String[] {this.tileSign.getCommand(0).getString(), this.tileSign.getCommand(1).getString(), this.tileSign.getCommand(2).getString(), this.tileSign.getCommand(3).getString()};
         if (clientplaynethandler != null) {
             if (this.isTextEdit)
                 clientplaynethandler.sendPacket(new CUpdateSignPacket(this.tileSign.getPos(), this.tileSign.getText(0), this.tileSign.getText(1), this.tileSign.getText(2), this.tileSign.getText(3)));
             else
-                clientplaynethandler.sendPacket(new CommandSignModUpdateSignPacket(this.tileSign.getPos(), commands));
+                clientplaynethandler.sendPacket(new CommandSignModUpdateSignPacket(this.tileSign.getPos(), this.tileSign.getCommand(0), this.tileSign.getCommand(1), this.tileSign.getCommand(2), this.tileSign.getCommand(3)));
         }
 
         this.tileSign.setEditable(true);
@@ -97,26 +96,18 @@ public class CommandSignScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) { //TODO
-        //if (this.isTextEdit) {
-            if (p_keyPressed_1_ == 265) {
-                this.editLine = this.editLine - 1 & 3;
-                this.textInputUtil.func_216899_b();
-                return true;
-            } else if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335) {
-                return this.textInputUtil.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-            } else {
-                this.editLine = this.editLine + 1 & 3;
-                this.textInputUtil.func_216899_b();
-                return true;
-            }
-        /*}
-        else {
-            if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335)
-                return this.textInputUtil.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-
+    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
+        if (p_keyPressed_1_ == 265) {
+            this.editLine = this.editLine - 1 & 3;
+            this.textInputUtil.func_216899_b();
             return true;
-        }*/
+        } else if (p_keyPressed_1_ != 264 && p_keyPressed_1_ != 257 && p_keyPressed_1_ != 335) {
+            return this.textInputUtil.func_216897_a(p_keyPressed_1_) || super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        } else {
+            this.editLine = this.editLine + 1 & 3;
+            this.textInputUtil.func_216899_b();
+            return true;
+        }
     }
 
     @Override
@@ -169,7 +160,6 @@ public class CommandSignScreen extends Screen {
         int k = this.textInputUtil.func_216896_c();
         int l = this.textInputUtil.func_216898_d();
         int i1 = this.minecraft.fontRenderer.getBidiFlag() ? -1 : 1;
-
         //TODO if !isTextEdit make more room for text ?
         int j1 = this.editLine * 10 - this.tileSign.signText.length * 5;
 
