@@ -34,6 +34,7 @@ public class CommandSignScreen extends Screen {
     private int editLine;
     private TextInputUtil textInputUtil;
     private final boolean isTextEdit;
+    private final int maxTextLength = 270;
 
     public CommandSignScreen(CommandSignTileEntity teSign, boolean isTextEdit) {
         super(new TranslationTextComponent(isTextEdit ? "sign.edit" : "command_sign_mod_command.edit"));
@@ -54,7 +55,7 @@ public class CommandSignScreen extends Screen {
         }
         else {
             this.textInputUtil = new TextInputUtil(this.minecraft, () -> this.tileSign.getCommand(this.editLine).getString(), (p_214265_1_) ->
-            this.tileSign.setCommand(this.editLine, new StringTextComponent(p_214265_1_)), 90);
+            this.tileSign.setCommand(this.editLine, new StringTextComponent(p_214265_1_)), maxTextLength);
         }
     }
 
@@ -150,7 +151,7 @@ public class CommandSignScreen extends Screen {
             }
             else {
                 astring[j] = this.tileSign.getRenderCommand(j, (p_228192_1_) -> {
-                    List<ITextComponent> list = RenderComponentsUtil.splitText(p_228192_1_, 90, this.minecraft.fontRenderer, false, true);
+                    List<ITextComponent> list = RenderComponentsUtil.splitText(p_228192_1_, maxTextLength, this.minecraft.fontRenderer, false, true);
                     return list.isEmpty() ? "" : list.get(0).getFormattedText();
                 });
             }

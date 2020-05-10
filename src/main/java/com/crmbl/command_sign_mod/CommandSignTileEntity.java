@@ -116,10 +116,11 @@ public class CommandSignTileEntity extends SignTileEntity {
             ServerPlayerEntity player = (ServerPlayerEntity)playerIn;
             MinecraftServer serverWorld = player.getServerWorld().getServer();
             Commands commandManager = serverWorld.getCommandManager();
-
-            String finalCommand = this.commandText[0].getString() + this.commandText[1].getString() + this.commandText[2].getString() + this.commandText[3].getString();
             try {
-                commandManager.getDispatcher().execute(finalCommand, serverWorld.getCommandSource());
+                for (int i = 0; i < 4; i++) {
+                    if (this.commandText[i] != null && !this.commandText[i].getString().equals(""))
+                        commandManager.getDispatcher().execute(this.commandText[i].getString(), serverWorld.getCommandSource());
+                }
             } catch (CommandSyntaxException ignored) {
                 player.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
             }
