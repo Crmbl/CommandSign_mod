@@ -3,6 +3,6 @@
   "item.command_sign_mod.command_wand_item" : "Baguette de commande",
   "block.command_sign_mod.command_sign_wall_block": "Panneau de commande",
   "block.command_sign_mod.command_sign_block": "Panneau de commande",
-  "command_sign_mod.syntax_error": "Erreur de syntaxe commande",
+  "command_sign_mod.syntax_error": "Commande non valide",
   "command_sign_mod_command.edit": "Edition de la commande"
 }

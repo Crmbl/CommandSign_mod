@@ -117,7 +117,7 @@ public class CommandSignTileEntity extends SignTileEntity {
         try {
             commandManager.getDispatcher().execute(finalCommand, serverWorld.getCommandSource());
         } catch (CommandSyntaxException ignored) {
-            serverWorld.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
+            playerIn.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
         }
     }
 

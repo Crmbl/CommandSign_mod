@@ -3,6 +3,6 @@
   "item.command_sign_mod.command_wand_item" : "Command Wand",
   "block.command_sign_mod.command_sign_wall_block": "Command Sign",
   "block.command_sign_mod.command_sign_block": "Command Sign",
-  "command_sign_mod.syntax_error": "Syntax error command",
+  "command_sign_mod.syntax_error": "Command not valid",
   "command_sign_mod_command.edit": "Edit command message"
 }
