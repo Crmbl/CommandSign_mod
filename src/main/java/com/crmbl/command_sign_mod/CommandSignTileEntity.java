@@ -1,7 +1,9 @@
 package com.crmbl.command_sign_mod;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
@@ -15,10 +17,10 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.*;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkDirection;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -109,30 +111,41 @@ public class CommandSignTileEntity extends SignTileEntity {
         return false;
     }
 
-    public void executeString(ServerPlayerEntity playerIn) {
-        MinecraftServer serverWorld = playerIn.getServerWorld().getServer();
-        Commands commandManager = serverWorld.getCommandManager();
+    public void executeString(PlayerEntity playerIn) {
+        if (playerIn instanceof ServerPlayerEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity)playerIn;
+            MinecraftServer serverWorld = player.getServerWorld().getServer();
+            Commands commandManager = serverWorld.getCommandManager();
 
-        String finalCommand = this.commandText[0].getString() + this.commandText[1].getString() + this.commandText[2].getString() + this.commandText[3].getString();
-        try {
-            commandManager.getDispatcher().execute(finalCommand, serverWorld.getCommandSource());
-        } catch (CommandSyntaxException ignored) {
-            playerIn.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
+            String finalCommand = this.commandText[0].getString() + this.commandText[1].getString() + this.commandText[2].getString() + this.commandText[3].getString();
+            try {
+                commandManager.getDispatcher().execute(finalCommand, serverWorld.getCommandSource());
+            } catch (CommandSyntaxException ignored) {
+                player.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
+            }
         }
     }
 
-    public ActionResultType onCommandSignActivated(ServerPlayerEntity player, Hand handIn) {
+    public ActionResultType onCommandSignActivated(World worldIn, PlayerEntity player, Hand handIn) {
         ItemStack currentItemStack = player.getHeldItem(handIn);
         Item currentItem = currentItemStack.getItem();
 
         if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
-            setEditable(true);
-            setPlayer(player);
-            CommandSignModHandler.INSTANCE.sendTo(new CommandSignModOpenSignPacket(this.getPos(), false), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+            if (player instanceof ServerPlayerEntity)
+                setPlayer(player);
+            if (worldIn.isRemote) {
+                setEditable(true);
+                openEditor();
+            }
         }
         else
             this.executeString(player);
 
         return ActionResultType.SUCCESS;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void openEditor() {
+        Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(this, false));
     }
 }

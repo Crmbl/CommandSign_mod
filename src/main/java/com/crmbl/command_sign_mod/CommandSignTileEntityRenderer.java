@@ -22,6 +22,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
+@OnlyIn(Dist.CLIENT)
 public class CommandSignTileEntityRenderer extends TileEntityRenderer<CommandSignTileEntity> {
     private final CommandSignTileEntityRenderer.SignModel model = new CommandSignTileEntityRenderer.SignModel();
 

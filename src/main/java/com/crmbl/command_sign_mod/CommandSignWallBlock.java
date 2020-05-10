@@ -4,7 +4,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.WallSignBlock;
 import net.minecraft.block.WoodType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -32,10 +31,10 @@ public class CommandSignWallBlock extends WallSignBlock {
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult result) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if (!(tileEntity instanceof CommandSignTileEntity) || !(player instanceof ServerPlayerEntity))
+        if (!(tileEntity instanceof CommandSignTileEntity))
             return super.onBlockActivated(state, worldIn, pos, player, handIn, result);
 
         CommandSignTileEntity signTileEntity = ((CommandSignTileEntity) tileEntity);
-        return signTileEntity.onCommandSignActivated((ServerPlayerEntity)player, handIn);
+        return signTileEntity.onCommandSignActivated(worldIn, player, handIn);
     }
 }

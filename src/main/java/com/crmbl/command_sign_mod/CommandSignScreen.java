@@ -6,7 +6,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.StandingSignBlock;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.RenderComponentsUtil;
 import net.minecraft.client.gui.fonts.TextInputUtil;
 import net.minecraft.client.gui.screen.Screen;
@@ -22,16 +21,18 @@ import net.minecraft.network.play.client.CUpdateSignPacket;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
+@OnlyIn(Dist.CLIENT)
 public class CommandSignScreen extends Screen {
     private final CommandSignTileEntityRenderer.SignModel model = new CommandSignTileEntityRenderer.SignModel();
     private final CommandSignTileEntity tileSign;
     private int updateCounter;
     private int editLine;
     private TextInputUtil textInputUtil;
-    private final Minecraft minecraft;
     private final boolean isTextEdit;
 
     public CommandSignScreen(CommandSignTileEntity teSign, boolean isTextEdit) {
@@ -39,7 +40,6 @@ public class CommandSignScreen extends Screen {
 
         this.isTextEdit = isTextEdit;
         this.tileSign = teSign;
-        this.minecraft = Minecraft.getInstance();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CommandSignScreen extends Screen {
 
     @Override
     public void removed() {
-        Minecraft.getInstance().keyboardListener.enableRepeatEvents(false);
+        this.minecraft.keyboardListener.enableRepeatEvents(false);
         ClientPlayNetHandler clientplaynethandler = this.minecraft.getConnection();
         if (clientplaynethandler != null) {
             if (this.isTextEdit)
