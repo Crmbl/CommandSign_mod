@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "   ",
+    " a ",
+    " e "
+  ],
+  "key":
+  {
+    "a":
+    {
+      "item": "minecraft:obsidian"
+    },
+    "e":
+    {
+      "item": "minecraft:stick"
+    }
+  },
+  "result":
+  {
+    "item": "command_sign_mod:command_wand_item",
+    "count": 1
+  }
+}

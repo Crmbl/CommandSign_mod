@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "ppp",
+    "prp",
+    " s "
+  ],
+  "key":
+  {
+    "p":
+    {
+      "tag": "minecraft:planks"
+    },
+    "r":
+    {
+      "item": "minecraft:redstone"
+    },
+    "s":
+    {
+      "item": "minecraft:stick"
+    }
+  },
+  "result":
+  {
+    "item": "command_sign_mod:command_sign_item",
+    "count": 3
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "name": "command_sign_block_pool",
+      "rolls": 1,
+      "weight": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "command_sign_mod:command_sign_item"
+        }
+      ],
+      "functions": [
+        {
+          "function": "set_count",
+          "count": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}
