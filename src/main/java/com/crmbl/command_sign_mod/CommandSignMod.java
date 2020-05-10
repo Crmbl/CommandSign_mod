@@ -17,6 +17,7 @@ public class CommandSignMod
         CommandSignModItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         CommandSignModBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         CommandSignModEntityType.TILE_ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        new CommandSignModHandler().register();
     }
 
     private void onClientSetup(final FMLClientSetupEvent event) {

@@ -10,6 +10,7 @@ import net.minecraft.item.WallOrFloorItem;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkDirection;
 
 import javax.annotation.Nullable;
 
@@ -25,8 +26,10 @@ public class CommandSignItem extends WallOrFloorItem {
             return flag;
 
         CommandSignTileEntity commandSignTile = (CommandSignTileEntity)tileEntity;
-        commandSignTile.setPlayer(player);
-        ((ServerPlayerEntity) player).connection.sendPacket(new CommandSignModOpenSignPacket(commandSignTile.getPos(), true));
+        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        commandSignTile.setPlayer(serverPlayer);
+        CommandSignModHandler.INSTANCE.sendTo(new CommandSignModOpenSignPacket(commandSignTile.getPos(), true), serverPlayer.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+
         return flag;
     }
 }

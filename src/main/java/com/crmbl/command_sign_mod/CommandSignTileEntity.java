@@ -18,6 +18,7 @@ import net.minecraft.util.text.*;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkDirection;
 
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -127,7 +128,7 @@ public class CommandSignTileEntity extends SignTileEntity {
         if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
             setEditable(true);
             setPlayer(player);
-            player.connection.sendPacket(new CommandSignModOpenSignPacket(getPos(), false));
+            CommandSignModHandler.INSTANCE.sendTo(new CommandSignModOpenSignPacket(this.getPos(), false), player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
         }
         else
             this.executeString(player);
