@@ -2,6 +2,7 @@ package com.crmbl.command_sign_mod;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -111,19 +112,18 @@ public class CommandSignTileEntity extends SignTileEntity {
         return false;
     }
 
-    public void executeString(PlayerEntity playerIn) {
-        if (playerIn instanceof ServerPlayerEntity) {
-            ServerPlayerEntity player = (ServerPlayerEntity)playerIn;
-            MinecraftServer serverWorld = player.getServerWorld().getServer();
-            Commands commandManager = serverWorld.getCommandManager();
-            try {
-                for (int i = 0; i < 4; i++) {
-                    if (this.commandText[i] != null && !this.commandText[i].getString().equals(""))
-                        commandManager.getDispatcher().execute(this.commandText[i].getString(), serverWorld.getCommandSource());
-                }
-            } catch (CommandSyntaxException ignored) {
-                player.sendMessage(new TranslationTextComponent("command_sign_mod.syntax_error"));
-            }
+    public void executeString(World world) {
+        if (!world.isRemote)
+            return;
+
+        Minecraft minecraft = Minecraft.getInstance();
+        for (int i = 0; i < 4; i++) {
+            if (this.commandText[i] == null || this.commandText[i].getString().equals(""))
+                continue;
+
+            ChatScreen chatScreen = new ChatScreen(this.commandText[i].getString());
+            minecraft.displayGuiScreen(chatScreen);
+            chatScreen.keyPressed(257, 0, 0);
         }
     }
 
@@ -140,7 +140,7 @@ public class CommandSignTileEntity extends SignTileEntity {
             }
         }
         else
-            this.executeString(player);
+            this.executeString(worldIn);
 
         return ActionResultType.SUCCESS;
     }

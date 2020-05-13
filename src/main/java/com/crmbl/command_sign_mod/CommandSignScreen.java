@@ -34,7 +34,7 @@ public class CommandSignScreen extends Screen {
     private int editLine;
     private TextInputUtil textInputUtil;
     private final boolean isTextEdit;
-    private final int maxTextLength = 270;
+    private final int maxTextLength = 360;
 
     public CommandSignScreen(CommandSignTileEntity teSign, boolean isTextEdit) {
         super(new TranslationTextComponent(isTextEdit ? "sign.edit" : "command_sign_mod_command.edit"));
