@@ -112,10 +112,27 @@ public class CommandSignTileEntity extends SignTileEntity {
         return false;
     }
 
-    public void executeString(World world) {
-        if (!world.isRemote)
-            return;
+    public ActionResultType onCommandSignActivated(World worldIn, PlayerEntity player, Hand handIn) {
+        ItemStack currentItemStack = player.getHeldItem(handIn);
+        Item currentItem = currentItemStack.getItem();
 
+        if (worldIn.isRemote) {
+            if (currentItem == CommandSignModItems.COMMAND_WAND.get())
+                this.openEditor();
+            else
+                this.executeString();
+        }
+
+        return ActionResultType.SUCCESS;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void openEditor() {
+        Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(this, false));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void executeString() {
         Minecraft minecraft = Minecraft.getInstance();
         for (int i = 0; i < 4; i++) {
             if (this.commandText[i] == null || this.commandText[i].getString().equals(""))
@@ -125,28 +142,5 @@ public class CommandSignTileEntity extends SignTileEntity {
             minecraft.displayGuiScreen(chatScreen);
             chatScreen.keyPressed(257, 0, 0);
         }
-    }
-
-    public ActionResultType onCommandSignActivated(World worldIn, PlayerEntity player, Hand handIn) {
-        ItemStack currentItemStack = player.getHeldItem(handIn);
-        Item currentItem = currentItemStack.getItem();
-
-        if (currentItem == CommandSignModItems.COMMAND_WAND.get()) {
-            if (player instanceof ServerPlayerEntity)
-                setPlayer(player);
-            if (worldIn.isRemote) {
-                setEditable(true);
-                openEditor();
-            }
-        }
-        else
-            this.executeString(worldIn);
-
-        return ActionResultType.SUCCESS;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public void openEditor() {
-        Minecraft.getInstance().displayGuiScreen(new CommandSignScreen(this, false));
     }
 }

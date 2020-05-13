@@ -56,11 +56,6 @@ public class CommandSignModUpdateSignPacket {
                     return;
 
                 CommandSignTileEntity commandSignTileEntity = (CommandSignTileEntity)tileentity;
-                if (!commandSignTileEntity.getIsEditable() || commandSignTileEntity.getPlayer() != player) {
-                    player.getServer().logWarning("Player " + player.getName().getString() + " just tried to change non-editable sign");
-                    return;
-                }
-
                 String[] commands = this.getCommand();
                 for(int i = 0; i < commands.length; ++i)
                     commandSignTileEntity.setCommand(i, new StringTextComponent(TextFormatting.getTextWithoutFormattingCodes(commands[i])));
